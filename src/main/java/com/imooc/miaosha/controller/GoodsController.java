@@ -40,7 +40,7 @@ public class GoodsController {
                          @PathVariable("goodsId")long goodsId) {
     	model.addAttribute("user", user);
     	
-    	GoodsVo goods = goodsService.getGoodsVoByGoodId(goodsId);
+    	GoodsVo goods = goodsService.getGoodsVoByGoodsId(goodsId);
     	model.addAttribute("goods", goods);
     	
     	long startAt = goods.getStartDate().getTime();

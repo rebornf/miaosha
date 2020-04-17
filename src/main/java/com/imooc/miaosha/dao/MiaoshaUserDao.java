@@ -8,7 +8,7 @@ import com.imooc.miaosha.domain.MiaoshaUser;
 
 @Mapper
 public interface MiaoshaUserDao {
-	
+
 	@Select("select * from miaosha_user where id = #{id}")
 	public MiaoshaUser getById(@Param("id")long id);
 }
