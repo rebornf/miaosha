@@ -9,8 +9,11 @@
         <module name="miaosha" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="miaosha" target="9" />
+    <bytecodeTargetLevel target="8">
+      <module name="miaosha" target="1.8" />
     </bytecodeTargetLevel>
+  </component>
+  <component name="JavacSettings">
+    <option name="DEPRECATION" value="false" />
   </component>
 </project>

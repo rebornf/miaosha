@@ -1,9 +1,5 @@
 package com.imooc.miaosha.dao;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
-import org.apache.ibatis.annotations.SelectKey;
+import org.apache.ibatis.annotations.*;
 
 import com.imooc.miaosha.domain.MiaoshaOrder;
 import com.imooc.miaosha.domain.OrderInfo;
@@ -22,5 +18,13 @@ public interface OrderDao {
     @Insert("insert into miaosha_order (user_id, goods_id, order_id)values(#{userId}, #{goodsId}, #{orderId})")
     public int insertMiaoshaOrder(MiaoshaOrder miaoshaOrder);
 
+    @Select("select * from order_info where id = #{orderId}")
+    public OrderInfo getOrderById(@Param("orderId") long orderId);
+
+    @Delete("delete from order_info")
+    public void deleteOrders();
+
+    @Delete("delete from miaosha_order")
+    public void deleteMiaoshaOrders();
 
 }
