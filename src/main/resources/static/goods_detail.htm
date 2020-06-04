@@ -17,6 +17,19 @@
     <script type="text/javascript" src="/js/md5.min.js"></script>
     <!-- common.js -->
     <script type="text/javascript" src="/js/common.js"></script>
+    <style type="text/css">
+        html,body{
+            height:100%;
+            width:100%;
+        }
+        body{
+            background:url('/img/bg2.jpg') no-repeat;
+            background-size:100% 100%;
+        }
+        #goodslist td{
+            border-top:1px solid #39503f61;
+        }
+    </style>
 </head>
 <body>
 
@@ -48,7 +61,13 @@
         		<button class="btn btn-primary btn-block" type="submit" id="buyButton">立即秒杀</button>
         		<input type="hidden" name="goodsId"  id="goodsId" />
         	</form>-->
-        	<button class="btn btn-primary btn-block" type="button" id="buyButton"onclick="getMiaoshaPath()">立即秒杀</button>
+            <div class="row">
+                <div class="form-inline">
+                    <img id="verifyCodeImg" width="80" height="32"  style="display:none" onclick="refreshVerifyCode()"/>
+                    <input id="verifyCode"  class="form-control" style="display:none"/>
+                    <button class="btn btn-primary" type="button" id="buyButton"onclick="getMiaoshaPath()">立即秒杀</button>
+                </div>
+            </div>
         	<input type="hidden" name="goodsId"  id="goodsId" />
         </td>
      </tr>
@@ -109,7 +128,7 @@
                     }else if(result == 0){//继续轮询
                         setTimeout(function(){
                             getMiaoshaResult(goodsId);
-                        }, 50);
+                        }, 200);
                     }else{
                         layer.confirm("恭喜你，秒杀成功！查看订单？", {btn:["确定","取消"]},
                             function(){
@@ -194,28 +213,36 @@ function getDetail(){
 	});
 }
 
-function countDown(){
-	var remainSeconds = $("#remainSeconds").val();
-	var timeout;
-	if(remainSeconds > 0){//秒杀还没开始，倒计时
-		$("#buyButton").attr("disabled", true);
-	   $("#miaoshaTip").html("秒杀倒计时："+remainSeconds+"秒");
-		timeout = setTimeout(function(){
-			$("#countDown").text(remainSeconds - 1);
-			$("#remainSeconds").val(remainSeconds - 1);
-			countDown();
-		},1000);
-	}else if(remainSeconds == 0){//秒杀进行中
-		$("#buyButton").attr("disabled", false);
-		if(timeout){
-			clearTimeout(timeout);
-		}
-		$("#miaoshaTip").html("秒杀进行中");
-	}else{//秒杀已经结束
-		$("#buyButton").attr("disabled", true);
-		$("#miaoshaTip").html("秒杀已经结束");
-	}
+function countDown() {
+    var remainSeconds = $("#remainSeconds").val();
+    var timeout;
+    if (remainSeconds > 0) {//秒杀还没开始，倒计时
+        $("#buyButton").attr("disabled", true);
+        $("#miaoshaTip").html("秒杀倒计时：" + remainSeconds + "秒");
+        timeout = setTimeout(function () {
+            $("#countDown").text(remainSeconds - 1);
+            $("#remainSeconds").val(remainSeconds - 1);
+            countDown();
+        }, 1000);
+    } else if (remainSeconds == 0) {//秒杀进行中
+        $("#buyButton").attr("disabled", false);
+        if (timeout) {
+            clearTimeout(timeout);
+        }
+        $("#miaoshaTip").html("秒杀进行中");
+        $("#verifyCodeImg").attr("src", "/miaosha/verifyCode?goodsId=" + $("#goodsId").val());
+        $("#verifyCodeImg").show();
+        $("#verifyCode").show();
+    } else {//秒杀已经结束
+        $("#buyButton").attr("disabled", true);
+        $("#miaoshaTip").html("秒杀已经结束");
+        $("#verifyCodeImg").hide();
+        $("#verifyCode").hide();
+    }
 }
+    function refreshVerifyCode(){
+        $("#verifyCodeImg").attr("src", "/miaosha/verifyCode?goodsId="+$("#goodsId").val()+"&timestamp="+new Date().getTime());
+    }
 
 </script>
 </html>
