@@ -1,4 +1,4 @@
-# miaosha   最终版见v3.0
+# miaosha   最终版见分支v3.0
 高并发秒杀商城
 - #### 使用 Spring boot、集成 Thymeleafr、result、封装集成 mybatis_druid,集成 jedis+redis 完成项目框架的搭建
 - #### 这个项目主要是针对处理高并发问题。主要考虑的问题有以下几个方面：
