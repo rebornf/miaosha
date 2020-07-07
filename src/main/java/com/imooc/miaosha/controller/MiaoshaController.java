@@ -7,10 +7,7 @@ import com.imooc.miaosha.domain.MiaoshaUser;
 import com.imooc.miaosha.domain.OrderInfo;
 import com.imooc.miaosha.rabbitmq.MQSender;
 import com.imooc.miaosha.rabbitmq.MiaoshaMessage;
-import com.imooc.miaosha.redis.GoodsKey;
-import com.imooc.miaosha.redis.MiaoshaKey;
-import com.imooc.miaosha.redis.OrderKey;
-import com.imooc.miaosha.redis.RedisService;
+import com.imooc.miaosha.redis.*;
 import com.imooc.miaosha.result.CodeMsg;
 import com.imooc.miaosha.result.Result;
 import com.imooc.miaosha.service.GoodsService;
@@ -59,7 +56,7 @@ public class MiaoshaController implements InitializingBean {
 	@Autowired
 	MQSender sender;
 
-	private HashMap<Long,Boolean>  localOverMap =new HashMap<Long,Boolean>();
+	private HashMap<Long,Boolean>  localOverMap =new HashMap<Long,Boolean>(); //使用内存标记减少
 
 	/**
 	 * 系统初始化
@@ -113,14 +110,14 @@ public class MiaoshaController implements InitializingBean {
 			return Result.error(CodeMsg.REQUEST_ILLEGAL);
 		}
 		//内存标记，减少redis的访问
-		boolean over =localOverMap.get(goodsId);
+		boolean over =localOverMap.get(goodsId); //10个请求，当第十一个请求过来的时候
 		if (over){
 			return  Result.error(CodeMsg.MIAO_SHA_OVER);
 		}
 		//预减库存
 		long stock = redisService.decr(GoodsKey.getMiaoshaGoodsStock, "" + goodsId);
-		if (stock < 0) {
-			localOverMap.put(goodsId,true);
+		if (stock < 0) {  //第十一个请求过来的时候，stock变成-1 ,这个时候localhashmap变成true,后面不管来多少请求,
+			localOverMap.put(goodsId,true);	// 都会直接返回秒杀结束，不再访问数据库
 			return Result.error(CodeMsg.MIAO_SHA_OVER);
 		}
 		//判断是否秒杀到了
@@ -176,9 +173,20 @@ public class MiaoshaController implements InitializingBean {
 	public Result<String> getMiaoshaPath(Model model, MiaoshaUser user,
 										 @RequestParam("goodsId")long goodsId,@RequestParam(value="verifyCode", defaultValue="0")
 													 int verifyCode) {
-		if(user == null) {
+		if (user == null) {
 			return Result.error(CodeMsg.SESSION_ERROR);
 		}
+		//查询访问次数  5秒钟访问5次数
+		//String uri = request.getRequestURI();
+		//String key = uri + "" user.getId();
+		//Integer count =redisService.get(AccessKey.access,Integer.class);
+		//if(count == null){
+		// redisService.set(AccessKey,key,1);
+		//}else if(count < 5){
+		//redisService.incr(AccessKey.access,key);
+	     //}else{
+		// return Result.error(CodeMsg.ACCESS_LIMIT_RECHED)
+
 		boolean check = miaoshaService.checkVerifyCode(user,goodsId, verifyCode);
 		if(!check) {
 			return Result.error(CodeMsg.REQUEST_ILLEGAL);

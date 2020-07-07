@@ -5,6 +5,13 @@ public class CodeMsg {
 
     private int code;
 	private String msg;
+
+
+
+	//注册登录
+	public static CodeMsg RESIGETR_SUCCESS=new CodeMsg(20000,"注册成功!");
+	public static CodeMsg RESIGETER_FAIL =new CodeMsg(200001,"注册失败!");
+	public static CodeMsg CODE_FAIL = new CodeMsg(200002,"验证码不一致!");
 	
 	//通用的错误码
 	public static CodeMsg SUCCESS = new CodeMsg(0, "success");
@@ -19,7 +26,8 @@ public class CodeMsg {
 	public static CodeMsg MOBILE_ERROR = new CodeMsg(500213, "手机号格式错误");
 	public static CodeMsg MOBILE_NOT_EXIST = new CodeMsg(500214, "手机号不存在");
 	public static CodeMsg PASSWORD_ERROR = new CodeMsg(500215, "密码错误");
-	
+
+
 	//商品模块 5003XX
 	
 	//订单模块 5004XX

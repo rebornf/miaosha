@@ -14,6 +14,10 @@ public class OrderInfo {
 	private Integer status;
 	private Date createDate;
 	private Date payDate;
+
+
+
+
 	public Long getId() {
 		return id;
 	}

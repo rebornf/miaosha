@@ -23,7 +23,8 @@ public class MQConfig {
     public static final String TOPIC_EXCHANGE = "topicExchage";
     public static final String FANOUT_EXCHANGE = "fanoutxchage";
     public static final String HEADERS_EXCHANGE = "headersExchage";
-
+    public static final String EXCHANGE_TOPIC = "exchange_topic";
+    public static final String MIAOSHATEST = "miaoshatest";
     /**
      * Direct模式 交换机Exchange
      * */

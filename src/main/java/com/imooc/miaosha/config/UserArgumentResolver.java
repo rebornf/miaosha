@@ -16,12 +16,23 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 import com.imooc.miaosha.domain.MiaoshaUser;
 import com.imooc.miaosha.service.MiaoshaUserService;
 
+
+
+/*
+* @Description:
+* @Param:  
+* @return:  
+* @Author: fty
+* @Date:  
+*/
+
 @Service
 public class UserArgumentResolver implements HandlerMethodArgumentResolver {
 
 	@Autowired
 	MiaoshaUserService userService;
-	
+
+	//先进行参数类型的判断，如果是这些参数，才进行接下来的处理，如果没有，就不处理
 	public boolean supportsParameter(MethodParameter parameter) {
 		Class<?> clazz = parameter.getParameterType();
 		return clazz==MiaoshaUser.class;
@@ -29,6 +40,8 @@ public class UserArgumentResolver implements HandlerMethodArgumentResolver {
 
 	public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
 			NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
+
+		//先把request 和 response取出来
 		HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
 		HttpServletResponse response = webRequest.getNativeResponse(HttpServletResponse.class);
 		
@@ -41,13 +54,13 @@ public class UserArgumentResolver implements HandlerMethodArgumentResolver {
 		return userService.getByToken(response, token);
 	}
 
-	private String getCookieValue(HttpServletRequest request, String cookiName) {
+	private String getCookieValue(HttpServletRequest request, String cookieName) {
 		Cookie[]  cookies = request.getCookies();
 		if (cookies ==null || cookies.length<=0){
 			return null ;
 		}
 		for(Cookie cookie : cookies) {
-			if(cookie.getName().equals(cookiName)) {
+			if(cookie.getName().equals(cookieName)) {
 				return cookie.getValue();
 			}
 		}

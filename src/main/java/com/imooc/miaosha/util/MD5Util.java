@@ -9,7 +9,9 @@ public class MD5Util {
 	}
 	
 	private static final String salt = "1a2b3c4d";
-	
+
+
+	   //第一次MD5加密 用户填写的表单，在发送给服务器之前，先进行一次MD5加密。然后以Post的形式发送给服务器，这里的salt是固定的
 	public static String inputPassToFormPass(String inputPass) {
 		String str = ""+salt.charAt(0)+salt.charAt(2) + inputPass +salt.charAt(5) + salt.charAt(4);
 		System.out.println(str);

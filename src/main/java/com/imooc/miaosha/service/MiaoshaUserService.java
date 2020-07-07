@@ -3,7 +3,14 @@ package com.imooc.miaosha.service;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 
+import com.imooc.miaosha.rabbitmq.MQSender;
+import com.imooc.miaosha.result.SnowflakeIdWorker;
+import com.imooc.miaosha.result.enums.MessageStatus;
+import com.imooc.miaosha.util.SnowFlake;
+import com.imooc.miaosha.vo.MiaoShaMessageVo;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,17 +24,30 @@ import com.imooc.miaosha.util.MD5Util;
 import com.imooc.miaosha.util.UUIDUtil;
 import com.imooc.miaosha.vo.LoginVo;
 
+import java.util.Date;
+
+
+/**
+* @Description:
+*
+*/
+
 @Service
 public class MiaoshaUserService {
 	
 	
 	public static final String COOKI_NAME_TOKEN = "token";
+	private static Logger logger = LoggerFactory.getLogger(MiaoshaUserService.class);
+	private SnowFlake snowFlake=new SnowFlake(2,3);
 	
 	@Autowired
 	MiaoshaUserDao miaoshaUserDao;
 	
 	@Autowired
 	RedisService redisService;
+
+	@Autowired
+	private MQSender sender ;
 	
 	public MiaoshaUser getById(long id) {
 		//取缓存
@@ -63,6 +83,44 @@ public class MiaoshaUserService {
 		return  true;
 
 	}
+
+
+	public boolean register(HttpServletResponse response , String userName , String passWord , String salt) {
+		MiaoshaUser miaoShaUser =  new MiaoshaUser();
+		miaoShaUser.setNickname(userName);
+		String DBPassWord =  MD5Util.formPassToDBPass(passWord , salt);
+		miaoShaUser.setPassword(DBPassWord);
+		miaoShaUser.setRegisterDate(new Date());
+		miaoShaUser.setSalt(salt);
+		miaoShaUser.setNickname(userName);
+		try {
+			miaoshaUserDao.insertMiaoShaUser(miaoShaUser);
+			MiaoshaUser user = miaoshaUserDao.getByNickname(miaoShaUser.getNickname());
+			if(user == null){
+				return false;
+			}
+
+			MiaoShaMessageVo vo = new MiaoShaMessageVo();
+			vo.setContent("尊敬的用户你好，你已经成功注册！");
+			vo.setCreateTime(new Date());
+			vo.setMessageId(SnowflakeIdWorker.getOrderId(0,0));
+			vo.setSendType(0);
+			vo.setStatus(0);
+			vo.setMessageType(MessageStatus.messageType.system_message.ordinal());
+			vo.setUserId(miaoShaUser.getId());
+			vo.setMessageHead(MessageStatus.ContentEnum.system_message_register_head.getMessage());
+			sender.sendRegisterMessage(vo);
+
+
+			//生成cookie 将session返回游览器 分布式session
+			String token= UUIDUtil.uuid();
+			addCookie(response, token, user);
+		} catch (Exception e) {
+			logger.error("注册失败",e);
+			return false;
+		}
+		return true;
+	}
 	
 
 	public MiaoshaUser getByToken(HttpServletResponse response, String token) {
@@ -96,15 +154,21 @@ public class MiaoshaUserService {
 		if(!calcPass.equals(dbPass)) {
 			throw new GlobalException(CodeMsg.PASSWORD_ERROR);
 		}
+		/**登陆成功以后，
+		*
+		 */
 		//生成cookie
-		String token	 = UUIDUtil.uuid();
+		//这里用的是UUID,
+		//String token  = UUIDUtil.uuid();
+		String token = String.valueOf(snowFlake.nextId());
+
 		addCookie(response, token, user);
 		return true;
 	}
 	
 	private void addCookie(HttpServletResponse response, String token, MiaoshaUser user) {
-		redisService.set(MiaoshaUserKey.token, token, user);
-		Cookie cookie = new Cookie(COOKI_NAME_TOKEN, token);
+		redisService.set(MiaoshaUserKey.token, token, user); //往缓存里面设置一下值
+		Cookie cookie = new Cookie(COOKI_NAME_TOKEN, token);//生成一个新的cookie
 		cookie.setMaxAge(MiaoshaUserKey.token.expireSeconds());
 		cookie.setPath("/");
 		response.addCookie(cookie);

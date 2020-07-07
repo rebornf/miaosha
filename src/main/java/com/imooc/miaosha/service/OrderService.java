@@ -4,6 +4,7 @@ import java.util.Date;
 
 import com.imooc.miaosha.redis.OrderKey;
 import com.imooc.miaosha.redis.RedisService;
+import com.imooc.miaosha.util.RandomUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
